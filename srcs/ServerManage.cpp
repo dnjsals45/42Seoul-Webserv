@@ -309,7 +309,7 @@ std::string handle_cgi(std::string cgiPath, Request req) {
 
 
 		std::string contentLength = "CONTENT_LENGTH=" + std::to_string(req.getBody().size());
-        std::string pythonPath = "/Users/hojsong/.brew/lib/python3.11/site-packages";
+        std::string pythonPath = "/opt/homebrew/lib/python3.10/site-packages";
         std::string pythonPathEnv = "PYTHONPATH=" + pythonPath;
         char* pythonPathEnvPtr = new char[pythonPathEnv.size() + 1];
         std::strcpy(pythonPathEnvPtr, pythonPathEnv.c_str());
@@ -351,8 +351,8 @@ std::string handle_cgi(std::string cgiPath, Request req) {
 
 		close(cgiOutput[0]);
 		waitpid(pid, &status, 0);
-
 		std::string http_response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: " + std::to_string(cgi_output.length()) + "\r\n\r\n" + cgi_output;
+        std::cout << http_response  << std::endl;
         return http_response;
 	}
 }
@@ -466,7 +466,7 @@ void    ServerManage::runServer(void) {
         }
         for (int i = 0; i < event_count; ++i) { // 이벤트 개수만큼 루프 순회
             curr_event = &eventList[i];
-            if (curr_event->flags & EV_ERROR) {
+            if (curr_event->flags & EV_ERROR) { // 에러 발생 시
                 continue;
             }
             if (checkServerIndex(curr_event)) { // 서버 소켓일 경우, 서버 인덱스 값
@@ -479,10 +479,11 @@ void    ServerManage::runServer(void) {
                 }
                 int clnt_fd = accept(servers[index].getServerSocket(), NULL, NULL);
                 if (clnt_fd == -1) {
-                    throw ErrorException("accept error");
+                    // 에러 처리
+                    continue;
                 }
                 if (fcntl(clnt_fd, F_SETFL, O_NONBLOCK) == -1) {
-                    throw ErrorException("fcntl error");
+                    // 에러 처리
                 }
                 // 클라이언트 소켓 이벤트 등록(READ와 WRITE 모두 등록하지만 READ부터 해야하기때문에 ENABLE, DISABLE로 구분)
                 change_events(clnt_fd, EVFILT_READ, EV_ADD | EV_ENABLE);
@@ -495,7 +496,7 @@ void    ServerManage::runServer(void) {
                 // 새로운 client 생성
                 std::cout << "Accept new client: " << clnt_fd << std::endl;
             }
-            else { // 클라이언트 소켓일 경우
+            else { // false일 경우 클라이언트 소켓 값
                 if (curr_event->filter == EVFILT_READ) {
                     if (connects[curr_event->ident].getTime() != NULL && time_diff(connects[curr_event->ident].getTime()) > 60000000){ // timeout일 경우
                         responses[curr_event->ident].setStatusCode(504); // 504 상태코드 세팅
@@ -541,6 +542,9 @@ void    ServerManage::runServer(void) {
                     }
                     else if (len == 0) { // 클라이언트와의 연결 종료(읽을 데이터가 없을 경우 클라이언트에게서는 0이 아닌 -1 값을 받아옴. 연결이 끊겼을 때(close)만 0 출력됨
                         std::cout << "Client " << curr_event->ident << " disconnected." << std::endl;
+                        // std::string disc = "Set-Cookie: expires=Thu, 01-Jan-1970 00:00:01; GMT path=/";
+                        // if (write(curr_event->ident, disc.c_str(), disc.length()) == -1)
+                            // std::cout << "Cookie reset Fail; "<< std::endl;
                         close(curr_event->ident);
                     }
                     else {
@@ -634,7 +638,7 @@ void    ServerManage::runServer(void) {
                     size_t res = sendResponse(curr_event->ident, servers[index], connects[curr_event->ident].getPath(), responses[curr_event->ident]);
                     if (res == WRITE_FINISH) {
                         change_events(curr_event->ident, EVFILT_READ, EV_ENABLE); // 클라이언트 READ 이벤트 활성화
-                        change_events(curr_event->ident, EVFILT_WRITE, EV_DISABLE); // 클라이언트 WRITE 이벤트 비활성화
+                        change_events(curr_event->ident, EVFILT_WRITE, EV_DISABLE); // 클아이언트 WRITE 이벤트 비활성화
                         connects[curr_event->ident].clearAll(); // 응답을 보냈으므로 안쪽 내용 초기화
                         responses[curr_event->ident].clearAll();
                         std::cout << "response ok" << std::endl;

@@ -1,4 +1,4 @@
-#!/Users/hojsong/.brew/bin/python3
+#!/opt/homebrew/bin/python3.10
 import sys
 import os
 import base64
