@@ -50,10 +50,10 @@
 - Cgi 처리가 필요할 경우 fork() 함수를 이용하여 멀티 프로세스 환경에서 동적 응답 생성
 
 ## 결과 화면
-- AutoIndex 설정
+- AutoIndex 설정하지 않았을 경우
 <img width="557" alt="스크린샷 2024-02-19 오후 3 38 00" src="https://github.com/dnjsals45/Webserv/assets/44596433/24692ada-1fc3-4c09-b489-107206ac80f3">
 
-- AutoIndex 설정하지 않았을 경우
+- AutoIndex 설정한 경우
 <img width="501" alt="스크린샷 2024-02-19 오후 3 38 24" src="https://github.com/dnjsals45/Webserv/assets/44596433/0b4003bc-4d5f-4015-b35c-29c0704499b0">
 
 - 이미지 파일 업로드(python cgi 프로그램)
